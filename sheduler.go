@@ -51,7 +51,7 @@ func (s *Scheduler[T]) Start(ctx context.Context) error {
 		s.Lock()
 		defer s.Unlock()
 		if len(s.nodes) == 0 {
-			s.errorCB(ErrUnexpectedEmptyList)
+			s.timeCh = make(<-chan time.Time)
 			return
 		}
 		dur := time.Until(s.nodes[0].At)
@@ -125,8 +125,6 @@ func (s *Scheduler[T]) Unschedule(id string) error {
 			continue
 		}
 
-		s.Lock()
-		defer s.Unlock()
 		s.removeNode(idx)
 		return nil
 	}
@@ -163,11 +161,11 @@ func (s *Scheduler[T]) removeNode(idx int) {
 }
 
 func (s *Scheduler[T]) approveIdHeader(node *model.Node[T]) string {
-	id, ok := node.Event.Headers()[model.HeaderID]
+	id, ok := node.Event.Headers()[EventHeaderID]
 	if !ok {
 		s.errorCB(ErrEventWithNoIDHeader)
 		id = uuid.NewString()
-		node.Event.Header(model.HeaderID, id)
+		node.Event.Header(EventHeaderID, id)
 	}
 	return id
 }
