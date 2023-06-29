@@ -51,7 +51,7 @@ func (s *Scheduler[T]) Start(ctx context.Context) error {
 		s.Lock()
 		defer s.Unlock()
 		if len(s.nodes) == 0 {
-			s.errorCB(ErrUnexpectedEmptyList)
+			s.timeCh = make(<-chan time.Time)
 			return
 		}
 		dur := time.Until(s.nodes[0].At)
@@ -125,8 +125,6 @@ func (s *Scheduler[T]) Unschedule(id string) error {
 			continue
 		}
 
-		s.Lock()
-		defer s.Unlock()
 		s.removeNode(idx)
 		return nil
 	}
