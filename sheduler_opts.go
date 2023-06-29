@@ -20,3 +20,13 @@ func OutChan[T any](ch chan *model.Event[T]) options.Option[Scheduler[T]] {
 		return nil
 	}
 }
+
+func ErrorCB[T any](cb func(error)) options.Option[Scheduler[T]] {
+	return func(target *Scheduler[T]) error {
+		if cb == nil {
+			return fmt.Errorf("got nil callback")
+		}
+		target.errorCB = cb
+		return nil
+	}
+}
