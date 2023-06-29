@@ -13,18 +13,13 @@ type Event[T any] struct {
 	headers map[string]string
 }
 
-const (
-	HeaderID        string = "ID"
-	HeaderCreatedAt string = "CREATED_AT"
-)
-
 func NewEvent[T any](payload T) *Event[T] {
 	return &Event[T]{
 		Payload: payload,
 		tags:    map[string]struct{}{},
 		headers: map[string]string{
-			HeaderID:        uuid.NewString(),
-			HeaderCreatedAt: time.Now().Format(time.RFC3339),
+			"ID":         uuid.NewString(),
+			"CREATED_AT": time.Now().Format(time.RFC3339),
 		},
 	}
 }
