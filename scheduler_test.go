@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/horockey/go-scheduler"
-	"github.com/horockey/go-scheduler/internal/model"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 )
@@ -123,7 +122,7 @@ func TestUnschedule(t *testing.T) {
 		}
 	}()
 	time.Sleep(time.Second)
-	err = s.Unschedule(e.Headers()[model.HeaderID])
+	err = s.Unschedule(e.Headers()[scheduler.EventHeaderID])
 	require.Nil(t, err)
 
 	time.Sleep(time.Millisecond * 1200)

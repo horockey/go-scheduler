@@ -161,11 +161,11 @@ func (s *Scheduler[T]) removeNode(idx int) {
 }
 
 func (s *Scheduler[T]) approveIdHeader(node *model.Node[T]) string {
-	id, ok := node.Event.Headers()[model.HeaderID]
+	id, ok := node.Event.Headers()[EventHeaderID]
 	if !ok {
 		s.errorCB(ErrEventWithNoIDHeader)
 		id = uuid.NewString()
-		node.Event.Header(model.HeaderID, id)
+		node.Event.Header(EventHeaderID, id)
 	}
 	return id
 }
