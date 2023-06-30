@@ -47,6 +47,8 @@ func NewScheduler[T any](opts ...options.Option[Scheduler[T]]) (*Scheduler[T], e
 	return s, nil
 }
 
+// Start scheduler.
+// To stop it, given context should be canceled.
 func (s *Scheduler[T]) Start(ctx context.Context) error {
 	updTimeChan := func() {
 		s.Lock()
@@ -96,6 +98,8 @@ func (s *Scheduler[T]) Start(ctx context.Context) error {
 	}
 }
 
+// Schedule new event.
+// Scheduler must be started to call this method properly.
 func (s *Scheduler[T]) Schedule(payload T, opts ...options.Option[model.Node[T]]) (*model.Event[T], error) {
 	e := model.NewEvent[T](payload)
 	n := &model.Node[T]{
@@ -117,6 +121,8 @@ func (s *Scheduler[T]) Schedule(payload T, opts ...options.Option[model.Node[T]]
 	return e, nil
 }
 
+// Unschedule scheduled event by id.
+// Scheduler must be started to call this method properly.
 func (s *Scheduler[T]) Unschedule(id string) error {
 	s.Lock()
 	defer s.Unlock()
@@ -132,6 +138,7 @@ func (s *Scheduler[T]) Unschedule(id string) error {
 	return ErrEventNotFound
 }
 
+// Get channel, that emits scheduled events.
 func (s *Scheduler[T]) EmitChan() <-chan *model.Event[T] {
 	return s.emitEvent
 }
