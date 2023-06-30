@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/horockey/go-scheduler"
-	"github.com/horockey/go-scheduler/event"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 )
@@ -39,6 +38,7 @@ func TestSchedule_Once_UsingAfter(t *testing.T) {
 
 	ctx := context.TODO()
 	go s.Start(ctx)
+	time.Sleep(time.Millisecond * 200)
 
 	requiredPayload := "foo"
 	_, err := s.Schedule(requiredPayload, scheduler.After[string](time.Second))
@@ -59,6 +59,7 @@ func TestSchedule_Once_UsingAt(t *testing.T) {
 
 	ctx := context.TODO()
 	go s.Start(ctx)
+	time.Sleep(time.Millisecond * 200)
 
 	requiredPayload := "foo"
 	_, err := s.Schedule(requiredPayload, scheduler.At[string](time.Now().Add(time.Second)))
@@ -79,6 +80,7 @@ func TestSchedule_Multiple(t *testing.T) {
 
 	ctx := context.TODO()
 	go s.Start(ctx)
+	time.Sleep(time.Millisecond * 200)
 
 	payload := "foo"
 	requiredPayload := "foo|foo|foo|"
@@ -106,6 +108,7 @@ func TestUnschedule(t *testing.T) {
 
 	ctx := context.TODO()
 	go s.Start(ctx)
+	time.Sleep(time.Millisecond * 200)
 
 	payload := "foo"
 	requiredPayload := ""
@@ -123,7 +126,7 @@ func TestUnschedule(t *testing.T) {
 		}
 	}()
 	time.Sleep(time.Second)
-	err = s.Unschedule(e.Headers()[event.HeaderID])
+	err = s.Unschedule(e.Headers()[scheduler.EventHeaderID()])
 	require.Nil(t, err)
 
 	time.Sleep(time.Millisecond * 1200)
