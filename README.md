@@ -2,7 +2,7 @@
 
 Library for delayed sending message to channel with ability to cancel sending.
 
-## Intallation
+## Installation
 
 `go get github.com/horockey/go-scheduler@latest`
 
@@ -30,4 +30,4 @@ Creating *event* via `NewEvent()` method sets 2 default headers to it:
 You are free to add any tags and headers to your events.
 
 ### Note
-Adding new tags and headers to *event* keep in mind, that tags and headers' keys are canonicalized (`strings.ToUpper()`) before actual addition to event
+Adding new tags and headers to *event* keep in mind, that they will be canonicalized (`strings.ToUpper()`) before actual addition to event

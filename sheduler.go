@@ -10,17 +10,18 @@ import (
 	"github.com/google/uuid"
 	"github.com/horockey/go-scheduler/internal/model"
 	"github.com/horockey/go-scheduler/pkg/options"
+	"golang.org/x/exp/slices"
 )
 
 var (
 	ErrNotRunning          = fmt.Errorf("scheduller is not running")
-	ErrEventNotFound       = fmt.Errorf("event with given id not found")
+	ErrEventNotFound       = fmt.Errorf("event for given filter not found")
 	ErrUnexpectedEmptyList = fmt.Errorf("unexpected empty shedule event list")
 	ErrEventWithNoIDHeader = fmt.Errorf("got event with no ID header. It will be generated")
 )
 
 type Scheduler[T any] struct {
-	sync.RWMutex
+	mu sync.RWMutex
 
 	isRunning bool
 
@@ -32,10 +33,11 @@ type Scheduler[T any] struct {
 	errorCB func(error)
 }
 
+// Create new scheduler with given opts.
 func NewScheduler[T any](opts ...options.Option[Scheduler[T]]) (*Scheduler[T], error) {
 	s := &Scheduler[T]{
 		nodes:       []*model.Node[T]{},
-		headChanged: make(chan struct{}, 2),
+		headChanged: make(chan struct{}, 100),
 		emitEvent:   make(chan *model.Event[T], 100),
 		timeCh:      make(<-chan time.Time),
 		errorCB:     func(err error) {},
@@ -50,8 +52,8 @@ func NewScheduler[T any](opts ...options.Option[Scheduler[T]]) (*Scheduler[T], e
 // To stop it, given context should be canceled.
 func (s *Scheduler[T]) Start(ctx context.Context) error {
 	updTimeChan := func() {
-		s.Lock()
-		defer s.Unlock()
+		s.mu.Lock()
+		defer s.mu.Unlock()
 		if len(s.nodes) == 0 {
 			s.timeCh = make(<-chan time.Time)
 			return
@@ -64,8 +66,8 @@ func (s *Scheduler[T]) Start(ctx context.Context) error {
 	}
 
 	emitEvent := func() {
-		s.Lock()
-		defer s.Unlock()
+		s.mu.Lock()
+		defer s.mu.Unlock()
 		if len(s.nodes) == 0 {
 			s.errorCB(ErrUnexpectedEmptyList)
 			return
@@ -92,6 +94,8 @@ func (s *Scheduler[T]) Start(ctx context.Context) error {
 			updTimeChan()
 		case <-ctx.Done():
 			s.setRunning(false)
+			close(s.headChanged)
+			close(s.emitEvent)
 			return fmt.Errorf("context err: %w", ctx.Err())
 		}
 	}
@@ -109,8 +113,8 @@ func (s *Scheduler[T]) Schedule(payload T, opts ...options.Option[model.Node[T]]
 		return nil, fmt.Errorf("applying opts: %w", err)
 	}
 
-	s.Lock()
-	defer s.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if !s.isRunning {
 		return nil, ErrNotRunning
 	}
@@ -123,8 +127,8 @@ func (s *Scheduler[T]) Schedule(payload T, opts ...options.Option[model.Node[T]]
 // Unschedule scheduled event by id.
 // Scheduler must be started to call this method properly.
 func (s *Scheduler[T]) Unschedule(id string) error {
-	s.Lock()
-	defer s.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	for idx, node := range s.nodes {
 		eventId := s.approveIdHeader(node)
 		if eventId != id {
@@ -135,6 +139,54 @@ func (s *Scheduler[T]) Unschedule(id string) error {
 		return nil
 	}
 	return ErrEventNotFound
+}
+
+// Unschedule all scheduled events with given tag.
+// Scheduler must be started to call this method properly.
+func (s *Scheduler[T]) UnscheduleByTag(tag string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	idxToRemove := []int{}
+	for idx, node := range s.nodes {
+		if !slices.Contains(node.Event.Tags(), tag) {
+			continue
+		}
+		idxToRemove = append(idxToRemove, idx)
+	}
+
+	if len(idxToRemove) == 0 {
+		return ErrEventNotFound
+	}
+
+	for removed, idx := range idxToRemove {
+		s.removeNode(idx - removed)
+	}
+	return nil
+}
+
+// Unschedule all scheduled events with given header key-value pair.
+// Scheduler must be started to call this method properly.
+func (s *Scheduler[T]) UnscheduleByHeader(key, value string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	idxToRemove := []int{}
+	for idx, node := range s.nodes {
+		if val, ok := node.Event.Headers()[key]; !ok || val != value {
+			continue
+		}
+		idxToRemove = append(idxToRemove, idx)
+	}
+
+	if len(idxToRemove) == 0 {
+		return ErrEventNotFound
+	}
+
+	for removed, idx := range idxToRemove {
+		s.removeNode(idx - removed)
+	}
+	return nil
 }
 
 // Get channel, that emits scheduled events.
@@ -178,7 +230,7 @@ func (s *Scheduler[T]) approveIdHeader(node *model.Node[T]) string {
 }
 
 func (s *Scheduler[T]) setRunning(v bool) {
-	s.Lock()
-	defer s.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.isRunning = v
 }
