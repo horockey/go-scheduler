@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/horockey/go-scheduler"
+	"github.com/horockey/go-scheduler/event"
 	"github.com/rs/zerolog"
 )
 
@@ -53,7 +54,7 @@ func main() {
 		log.Info().Msg("start listening to scheduler")
 		for e := range s.EmitChan() {
 			log.Info().
-				Str("event_id", e.Headers()[scheduler.EventHeaderID]).
+				Str("event_id", e.Headers()[event.HeaderID]).
 				Msg(e.Payload)
 		}
 	}()

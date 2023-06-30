@@ -8,7 +8,8 @@ import (
 	"github.com/horockey/go-scheduler/pkg/options"
 )
 
-// Add tag to scheduled
+// Add a tag to event.
+// Tag will be canonicalized before adding.
 func Tag[T any](t string) options.Option[model.Node[T]] {
 	return func(target *model.Node[T]) error {
 		target.Event.Tag(t)
@@ -16,6 +17,8 @@ func Tag[T any](t string) options.Option[model.Node[T]] {
 	}
 }
 
+// Add header to event.
+// Header's key will be canonicalized before adding.
 func Header[T any](k, v string) options.Option[model.Node[T]] {
 	return func(target *model.Node[T]) error {
 		target.Event.Header(k, v)
@@ -23,6 +26,8 @@ func Header[T any](k, v string) options.Option[model.Node[T]] {
 	}
 }
 
+// Emit event after given duration.
+// Duration must be positive.
 func After[T any](dur time.Duration) options.Option[model.Node[T]] {
 	return func(target *model.Node[T]) error {
 		if dur <= 0 {
@@ -33,6 +38,7 @@ func After[T any](dur time.Duration) options.Option[model.Node[T]] {
 	}
 }
 
+// Emit event at given time.
 func At[T any](t time.Time) options.Option[model.Node[T]] {
 	return func(target *model.Node[T]) error {
 		target.At = t
@@ -40,6 +46,7 @@ func At[T any](t time.Time) options.Option[model.Node[T]] {
 	}
 }
 
+// Continue eminitg event every given duration.
 func Every[T any](dur time.Duration) options.Option[model.Node[T]] {
 	return func(target *model.Node[T]) error {
 		if dur <= 0 {

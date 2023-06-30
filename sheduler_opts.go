@@ -21,6 +21,8 @@ func OutChan[T any](ch chan *model.Event[T]) options.Option[Scheduler[T]] {
 	}
 }
 
+// Add custom error handler.
+// By default it does noothing.
 func ErrorCB[T any](cb func(error)) options.Option[Scheduler[T]] {
 	return func(target *Scheduler[T]) error {
 		if cb == nil {
