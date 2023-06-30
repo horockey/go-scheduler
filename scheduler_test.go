@@ -132,3 +132,78 @@ func TestUnschedule(t *testing.T) {
 	time.Sleep(time.Millisecond * 1200)
 	require.Equal(t, requiredPayload, v)
 }
+
+func TestUnscheduleByTag(t *testing.T) {
+	s := prepareScheduler(t)
+
+	ctx := context.TODO()
+	go s.Start(ctx)
+	time.Sleep(time.Millisecond * 200)
+
+	requiredOutput := "foo|"
+	tag := "CUSTOM_TAG"
+
+	_, err := s.Schedule(
+		"foo",
+		scheduler.After[string](time.Second*2),
+	)
+	require.Nil(t, err)
+	_, err = s.Schedule(
+		"bar",
+		scheduler.After[string](time.Second*2),
+		scheduler.Tag[string](tag),
+	)
+	require.Nil(t, err)
+
+	var v string
+	go func() {
+		for {
+			e := <-s.EmitChan()
+			v += e.Payload + "|"
+		}
+	}()
+	time.Sleep(time.Second)
+	err = s.UnscheduleByTag(tag)
+	require.Nil(t, err)
+
+	time.Sleep(time.Millisecond * 2200)
+	require.Equal(t, requiredOutput, v)
+}
+
+func TestUnscheduleByHeader(t *testing.T) {
+	s := prepareScheduler(t)
+
+	ctx := context.TODO()
+	go s.Start(ctx)
+	time.Sleep(time.Millisecond * 200)
+
+	requiredOutput := "foo|"
+	headerKey := "CUSTOM_HEADER"
+	headerVal := "CUSTOM_VALUE"
+
+	_, err := s.Schedule(
+		"foo",
+		scheduler.After[string](time.Second*2),
+	)
+	require.Nil(t, err)
+	_, err = s.Schedule(
+		"bar",
+		scheduler.After[string](time.Second*2),
+		scheduler.Header[string](headerKey, headerVal),
+	)
+	require.Nil(t, err)
+
+	var v string
+	go func() {
+		for {
+			e := <-s.EmitChan()
+			v += e.Payload + "|"
+		}
+	}()
+	time.Sleep(time.Second)
+	err = s.UnscheduleByHeader(headerKey, headerVal)
+	require.Nil(t, err)
+
+	time.Sleep(time.Millisecond * 2200)
+	require.Equal(t, requiredOutput, v)
+}
