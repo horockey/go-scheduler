@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/horockey/go-scheduler/event"
 )
 
 type Event[T any] struct {
@@ -18,8 +19,8 @@ func NewEvent[T any](payload T) *Event[T] {
 		Payload: payload,
 		tags:    map[string]struct{}{},
 		headers: map[string]string{
-			"ID":         uuid.NewString(),
-			"CREATED_AT": time.Now().Format(time.RFC3339),
+			event.HeaderID:        uuid.NewString(),
+			event.HeaderCreatedAt: time.Now().Format(time.RFC3339),
 		},
 	}
 }

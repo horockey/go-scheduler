@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/horockey/go-scheduler/event"
 	"github.com/horockey/go-scheduler/internal/model"
 	"github.com/horockey/go-scheduler/pkg/options"
 )
@@ -161,11 +162,11 @@ func (s *Scheduler[T]) removeNode(idx int) {
 }
 
 func (s *Scheduler[T]) approveIdHeader(node *model.Node[T]) string {
-	id, ok := node.Event.Headers()[EventHeaderID]
+	id, ok := node.Event.Headers()[event.HeaderID]
 	if !ok {
 		s.errorCB(ErrEventWithNoIDHeader)
 		id = uuid.NewString()
-		node.Event.Header(EventHeaderID, id)
+		node.Event.Header(event.HeaderID, id)
 	}
 	return id
 }
