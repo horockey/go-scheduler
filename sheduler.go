@@ -10,11 +10,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/horockey/go-scheduler/internal/model"
 	"github.com/horockey/go-scheduler/pkg/options"
+	"golang.org/x/exp/slices"
 )
 
 var (
 	ErrNotRunning          = fmt.Errorf("scheduller is not running")
-	ErrEventNotFound       = fmt.Errorf("event with given id not found")
+	ErrEventNotFound       = fmt.Errorf("event for given filter not found")
 	ErrUnexpectedEmptyList = fmt.Errorf("unexpected empty shedule event list")
 	ErrEventWithNoIDHeader = fmt.Errorf("got event with no ID header. It will be generated")
 )
@@ -36,7 +37,7 @@ type Scheduler[T any] struct {
 func NewScheduler[T any](opts ...options.Option[Scheduler[T]]) (*Scheduler[T], error) {
 	s := &Scheduler[T]{
 		nodes:       []*model.Node[T]{},
-		headChanged: make(chan struct{}, 2),
+		headChanged: make(chan struct{}, 100),
 		emitEvent:   make(chan *model.Event[T], 100),
 		timeCh:      make(<-chan time.Time),
 		errorCB:     func(err error) {},
@@ -138,6 +139,54 @@ func (s *Scheduler[T]) Unschedule(id string) error {
 		return nil
 	}
 	return ErrEventNotFound
+}
+
+// Unschedule all scheduled events with given tag.
+// Scheduler must be started to call this method properly.
+func (s *Scheduler[T]) UnscheduleByTag(tag string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	idxToRemove := []int{}
+	for idx, node := range s.nodes {
+		if !slices.Contains(node.Event.Tags(), tag) {
+			continue
+		}
+		idxToRemove = append(idxToRemove, idx)
+	}
+
+	if len(idxToRemove) == 0 {
+		return ErrEventNotFound
+	}
+
+	for removed, idx := range idxToRemove {
+		s.removeNode(idx - removed)
+	}
+	return nil
+}
+
+// Unschedule all scheduled events with given header key-value pair.
+// Scheduler must be started to call this method properly.
+func (s *Scheduler[T]) UnscheduleByHeader(key, value string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	idxToRemove := []int{}
+	for idx, node := range s.nodes {
+		if val, ok := node.Event.Headers()[key]; !ok || val != value {
+			continue
+		}
+		idxToRemove = append(idxToRemove, idx)
+	}
+
+	if len(idxToRemove) == 0 {
+		return ErrEventNotFound
+	}
+
+	for removed, idx := range idxToRemove {
+		s.removeNode(idx - removed)
+	}
+	return nil
 }
 
 // Get channel, that emits scheduled events.
