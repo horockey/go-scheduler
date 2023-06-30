@@ -38,6 +38,7 @@ func TestSchedule_Once_UsingAfter(t *testing.T) {
 
 	ctx := context.TODO()
 	go s.Start(ctx)
+	time.Sleep(time.Millisecond * 200)
 
 	requiredPayload := "foo"
 	_, err := s.Schedule(requiredPayload, scheduler.After[string](time.Second))
@@ -58,6 +59,7 @@ func TestSchedule_Once_UsingAt(t *testing.T) {
 
 	ctx := context.TODO()
 	go s.Start(ctx)
+	time.Sleep(time.Millisecond * 200)
 
 	requiredPayload := "foo"
 	_, err := s.Schedule(requiredPayload, scheduler.At[string](time.Now().Add(time.Second)))
@@ -78,6 +80,7 @@ func TestSchedule_Multiple(t *testing.T) {
 
 	ctx := context.TODO()
 	go s.Start(ctx)
+	time.Sleep(time.Millisecond * 200)
 
 	payload := "foo"
 	requiredPayload := "foo|foo|foo|"
@@ -105,6 +108,7 @@ func TestUnschedule(t *testing.T) {
 
 	ctx := context.TODO()
 	go s.Start(ctx)
+	time.Sleep(time.Millisecond * 200)
 
 	payload := "foo"
 	requiredPayload := ""
