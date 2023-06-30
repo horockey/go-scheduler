@@ -67,9 +67,11 @@ func main() {
 		syscall.SIGQUIT,
 	)
 
-	<-sigChan
+	sig := <-sigChan
 
 	cancel()
-	log.Warn().Msg("terminating process...")
+	log.Warn().
+		Str("signal", sig.String()).
+		Msg("terminating process...")
 	wg.Wait()
 }

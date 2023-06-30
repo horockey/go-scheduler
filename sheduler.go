@@ -32,6 +32,7 @@ type Scheduler[T any] struct {
 	errorCB func(error)
 }
 
+// Create new scheduler with given opts.
 func NewScheduler[T any](opts ...options.Option[Scheduler[T]]) (*Scheduler[T], error) {
 	s := &Scheduler[T]{
 		nodes:       []*model.Node[T]{},
@@ -92,6 +93,8 @@ func (s *Scheduler[T]) Start(ctx context.Context) error {
 			updTimeChan()
 		case <-ctx.Done():
 			s.setRunning(false)
+			close(s.headChanged)
+			close(s.emitEvent)
 			return fmt.Errorf("context err: %w", ctx.Err())
 		}
 	}
