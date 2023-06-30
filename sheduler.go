@@ -20,7 +20,7 @@ var (
 )
 
 type Scheduler[T any] struct {
-	sync.RWMutex
+	mu sync.RWMutex
 
 	isRunning bool
 
@@ -50,8 +50,8 @@ func NewScheduler[T any](opts ...options.Option[Scheduler[T]]) (*Scheduler[T], e
 // To stop it, given context should be canceled.
 func (s *Scheduler[T]) Start(ctx context.Context) error {
 	updTimeChan := func() {
-		s.Lock()
-		defer s.Unlock()
+		s.mu.Lock()
+		defer s.mu.Unlock()
 		if len(s.nodes) == 0 {
 			s.timeCh = make(<-chan time.Time)
 			return
@@ -64,8 +64,8 @@ func (s *Scheduler[T]) Start(ctx context.Context) error {
 	}
 
 	emitEvent := func() {
-		s.Lock()
-		defer s.Unlock()
+		s.mu.Lock()
+		defer s.mu.Unlock()
 		if len(s.nodes) == 0 {
 			s.errorCB(ErrUnexpectedEmptyList)
 			return
@@ -109,8 +109,8 @@ func (s *Scheduler[T]) Schedule(payload T, opts ...options.Option[model.Node[T]]
 		return nil, fmt.Errorf("applying opts: %w", err)
 	}
 
-	s.Lock()
-	defer s.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if !s.isRunning {
 		return nil, ErrNotRunning
 	}
@@ -123,8 +123,8 @@ func (s *Scheduler[T]) Schedule(payload T, opts ...options.Option[model.Node[T]]
 // Unschedule scheduled event by id.
 // Scheduler must be started to call this method properly.
 func (s *Scheduler[T]) Unschedule(id string) error {
-	s.Lock()
-	defer s.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	for idx, node := range s.nodes {
 		eventId := s.approveIdHeader(node)
 		if eventId != id {
@@ -178,7 +178,7 @@ func (s *Scheduler[T]) approveIdHeader(node *model.Node[T]) string {
 }
 
 func (s *Scheduler[T]) setRunning(v bool) {
-	s.Lock()
-	defer s.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.isRunning = v
 }
