@@ -37,7 +37,13 @@ func TestSchedule_Once_UsingAfter(t *testing.T) {
 	s := prepareScheduler(t)
 
 	ctx := context.TODO()
-	go s.Start(ctx)
+	go func() {
+		err := s.Start(ctx)
+		if errors.Is(err, context.Canceled) {
+			return
+		}
+		require.Nil(t, err)
+	}()
 	time.Sleep(time.Millisecond * 200)
 
 	requiredPayload := "foo"
@@ -58,7 +64,13 @@ func TestSchedule_Once_UsingAt(t *testing.T) {
 	s := prepareScheduler(t)
 
 	ctx := context.TODO()
-	go s.Start(ctx)
+	go func() {
+		err := s.Start(ctx)
+		if errors.Is(err, context.Canceled) {
+			return
+		}
+		require.Nil(t, err)
+	}()
 	time.Sleep(time.Millisecond * 200)
 
 	requiredPayload := "foo"
@@ -79,7 +91,13 @@ func TestSchedule_Multiple(t *testing.T) {
 	s := prepareScheduler(t)
 
 	ctx := context.TODO()
-	go s.Start(ctx)
+	go func() {
+		err := s.Start(ctx)
+		if errors.Is(err, context.Canceled) {
+			return
+		}
+		require.Nil(t, err)
+	}()
 	time.Sleep(time.Millisecond * 200)
 
 	payload := "foo"
@@ -107,7 +125,13 @@ func TestUnschedule(t *testing.T) {
 	s := prepareScheduler(t)
 
 	ctx := context.TODO()
-	go s.Start(ctx)
+	go func() {
+		err := s.Start(ctx)
+		if errors.Is(err, context.Canceled) {
+			return
+		}
+		require.Nil(t, err)
+	}()
 	time.Sleep(time.Millisecond * 200)
 
 	payload := "foo"
@@ -137,7 +161,13 @@ func TestUnscheduleByTag(t *testing.T) {
 	s := prepareScheduler(t)
 
 	ctx := context.TODO()
-	go s.Start(ctx)
+	go func() {
+		err := s.Start(ctx)
+		if errors.Is(err, context.Canceled) {
+			return
+		}
+		require.Nil(t, err)
+	}()
 	time.Sleep(time.Millisecond * 200)
 
 	requiredOutput := "foo|"
@@ -174,7 +204,13 @@ func TestUnscheduleByHeader(t *testing.T) {
 	s := prepareScheduler(t)
 
 	ctx := context.TODO()
-	go s.Start(ctx)
+	go func() {
+		err := s.Start(ctx)
+		if errors.Is(err, context.Canceled) {
+			return
+		}
+		require.Nil(t, err)
+	}()
 	time.Sleep(time.Millisecond * 200)
 
 	requiredOutput := "foo|"

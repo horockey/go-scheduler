@@ -41,7 +41,14 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		s.Start(ctx)
+		go func() {
+			err := s.Start(ctx)
+			if err != nil && !errors.Is(err, context.Canceled) {
+				log.Error().
+					Err(fmt.Errorf("running scheduler: %w", err)).
+					Send()
+			}
+		}()
 	}()
 
 	const (
@@ -49,37 +56,61 @@ func main() {
 		headerKey   string = "AWESOME_HEADER"
 		headerValue string = "AWESOME_VALUE"
 	)
-	s.Schedule(
+	if _, err := s.Schedule(
 		"event_with_tag",
 		scheduler.After[string](time.Second*3),
 		scheduler.Every[string](time.Second),
 		scheduler.Tag[string](tag),
-	)
-	s.Schedule(
+	); err != nil {
+		log.Error().
+			Err(fmt.Errorf("scheduling event: %w", err)).
+			Send()
+	}
+	if _, err := s.Schedule(
 		"event_with_tag_and_header",
 		scheduler.After[string](time.Second*3),
 		scheduler.Every[string](time.Second),
 		scheduler.Tag[string](tag),
 		scheduler.Header[string](headerKey, headerValue),
-	)
-	s.Schedule(
+	); err != nil {
+		log.Error().
+			Err(fmt.Errorf("scheduling event: %w", err)).
+			Send()
+	}
+	if _, err := s.Schedule(
 		"event_with_header",
 		scheduler.After[string](time.Second*3),
 		scheduler.Every[string](time.Second),
 		scheduler.Header[string](headerKey, headerValue),
-	)
-	s.Schedule(
+	); err != nil {
+		log.Error().
+			Err(fmt.Errorf("scheduling event: %w", err)).
+			Send()
+	}
+	if _, err := s.Schedule(
 		"simple_event",
 		scheduler.After[string](time.Second*3),
 		scheduler.Every[string](time.Second),
-	)
+	); err != nil {
+		log.Error().
+			Err(fmt.Errorf("scheduling event: %w", err)).
+			Send()
+	}
 
 	go func() {
 		time.Sleep(time.Second * 5)
-		s.UnscheduleByTag(tag)
+		if err := s.UnscheduleByTag(tag); err != nil {
+			log.Error().
+				Err(fmt.Errorf("unscheduling event by tag: %w", err)).
+				Send()
+		}
 		log.Info().Msg("events with tag unscheduled")
 		time.Sleep(time.Second * 3)
-		s.UnscheduleByHeader(headerKey, headerValue)
+		if err := s.UnscheduleByHeader(headerKey, headerValue); err != nil {
+			log.Error().
+				Err(fmt.Errorf("unscheduling event by header: %w", err)).
+				Send()
+		}
 		log.Info().Msg("events with header unscheduled")
 	}()
 

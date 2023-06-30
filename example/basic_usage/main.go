@@ -41,14 +41,25 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		s.Start(ctx)
+		go func() {
+			err := s.Start(ctx)
+			if err != nil && !errors.Is(err, context.Canceled) {
+				log.Error().
+					Err(fmt.Errorf("running scheduler: %w", err)).
+					Send()
+			}
+		}()
 	}()
 
-	s.Schedule(
+	if _, err := s.Schedule(
 		"message to be shown",
 		scheduler.After[string](time.Second*5),
 		scheduler.Every[string](time.Second),
-	)
+	); err != nil {
+		log.Error().
+			Err(fmt.Errorf("scheduling event: %w", err)).
+			Send()
+	}
 	go func() {
 		log.Info().Msg("start listening to scheduler")
 		for e := range s.EmitChan() {
