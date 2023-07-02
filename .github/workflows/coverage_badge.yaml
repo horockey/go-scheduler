@@ -10,6 +10,7 @@ permissions:
 jobs:
   update_coverage_badge_source:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: ncruces/go-coverage-report@main
         with:
