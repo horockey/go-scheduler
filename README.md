@@ -1,5 +1,7 @@
 # go-scheduler
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/horockey/go-scheduler.svg)](https://pkg.go.dev/github.com/horockey/go-scheduler)
+
 Library for delayed sending message to channel with ability to cancel sending.
 
 ## Installation
