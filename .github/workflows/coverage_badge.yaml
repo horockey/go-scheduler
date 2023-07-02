@@ -1,0 +1,12 @@
+name: Coverage badge
+on:
+  push:
+    branches:
+      - main
+jobs:
+  update_coverage_badge_source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ncruces/go-coverage-report@main
+
+

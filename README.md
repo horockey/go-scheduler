@@ -1,6 +1,7 @@
 # go-scheduler
 
 ![CI](https://github.com/horockey/go-scheduler/actions/workflows/main.yaml/badge.svg)
+ [![Go Coverage](https://github.com/horockey/go-scheduler/wiki/coverage.svg)](https://raw.githack.com/wiki/horockey/go-scheduler/coverage.html)
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/horockey/go-scheduler.svg)](https://pkg.go.dev/github.com/horockey/go-scheduler)
 ![License](https://img.shields.io/github/license/horockey/go-scheduler)
