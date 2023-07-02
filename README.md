@@ -1,6 +1,10 @@
 # go-scheduler
 
+![CI](https://github.com/horockey/go-scheduler/actions/workflows/main.yaml/badge.svg)
+
 [![Go Reference](https://pkg.go.dev/badge/github.com/horockey/go-scheduler.svg)](https://pkg.go.dev/github.com/horockey/go-scheduler)
+![License](https://img.shields.io/github/license/horockey/go-scheduler)
+
 
 Library for delayed sending message to channel with ability to cancel sending.
 
