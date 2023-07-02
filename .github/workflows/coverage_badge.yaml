@@ -3,10 +3,18 @@ on:
   push:
     branches:
       - main
+permissions:
+    actions: write
+    contents: write
+    pages: write
 jobs:
   update_coverage_badge_source:
     runs-on: ubuntu-latest
     steps:
       - uses: ncruces/go-coverage-report@main
+        with:
+          report: 'true'
+          chart: 'false'
+          amend: 'false'
 
 
