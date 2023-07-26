@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/horockey/go-scheduler/internal/model"
-	"github.com/horockey/go-scheduler/pkg/options"
+	"github.com/horockey/go-toolbox/options"
 	"golang.org/x/exp/slices"
 )
 
@@ -42,7 +42,7 @@ func NewScheduler[T any](opts ...options.Option[Scheduler[T]]) (*Scheduler[T], e
 		timeCh:      make(<-chan time.Time),
 		errorCB:     func(err error) {},
 	}
-	if err := options.ApplyOpts(s, opts...); err != nil {
+	if err := options.ApplyOptions(s, opts...); err != nil {
 		return nil, fmt.Errorf("applying opts: %w", err)
 	}
 	return s, nil
@@ -109,7 +109,7 @@ func (s *Scheduler[T]) Schedule(payload T, opts ...options.Option[model.Node[T]]
 		Event: e,
 		At:    time.Now(),
 	}
-	if err := options.ApplyOpts(n, opts...); err != nil {
+	if err := options.ApplyOptions(n, opts...); err != nil {
 		return nil, fmt.Errorf("applying opts: %w", err)
 	}
 
