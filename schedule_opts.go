@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/horockey/go-scheduler/internal/model"
-	"github.com/horockey/go-scheduler/pkg/options"
+	"github.com/horockey/go-toolbox/options"
 )
 
 // Add a tag to event.

@@ -4,9 +4,10 @@ go 1.20
 
 require (
 	github.com/google/uuid v1.3.0
+	github.com/horockey/go-toolbox v1.1.1
 	github.com/rs/zerolog v1.29.1
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
+	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
 )
 
 require (

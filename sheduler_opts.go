@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/horockey/go-scheduler/internal/model"
-	"github.com/horockey/go-scheduler/pkg/options"
+	"github.com/horockey/go-toolbox/options"
 )
 
 // Set custom out chan.
