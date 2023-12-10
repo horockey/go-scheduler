@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -147,6 +148,8 @@ func (s *Scheduler[T]) UnscheduleByTag(tag string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	tag = strings.ToUpper(tag)
+
 	idxToRemove := []int{}
 	for idx, node := range s.nodes {
 		if !slices.Contains(node.Event.Tags(), tag) {
@@ -170,6 +173,8 @@ func (s *Scheduler[T]) UnscheduleByTag(tag string) error {
 func (s *Scheduler[T]) UnscheduleByHeader(key, value string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	key = strings.ToUpper(key)
 
 	idxToRemove := []int{}
 	for idx, node := range s.nodes {
